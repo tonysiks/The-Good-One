@@ -283,7 +283,7 @@ setInterval(() => changeSlide(1), 4000);
 async function fetchProducts(search='') {
   showLoading();
   try {
-    let url = `${SUPABASE_URL}/rest/v1/VWS?select=title,"categories/0","medias/0/url",fournisseur,url,price&limit=500`;
+    let url = `${SUPABASE_URL}/rest/v1/produits?select=title,category,image_url,fournisseur,url,price&limit=500`;
     if (search) url += `&title=ilike.*${encodeURIComponent(search)}*`;
     const res = await fetch(url, {
       headers: {
@@ -316,7 +316,7 @@ function showLoading() {
 
 function buildCategories(products) {
   const cats = {};
-  products.forEach(p => { const c = p['categories/0'] || 'Autre'; cats[c] = (cats[c]||0)+1; });
+  products.forEach(p => { const c = p['category'] || 'Autre'; cats[c] = (cats[c]||0)+1; });
   document.getElementById('categoryFilters').innerHTML = Object.entries(cats)
     .sort((a,b) => b[1]-a[1]).slice(0,10)
     .map(([c,n]) => `
@@ -328,7 +328,7 @@ function buildCategories(products) {
 
 function filterCat(cat) {
   activeCategory = activeCategory === cat ? null : cat;
-  const filtered = activeCategory ? allProducts.filter(p => p['categories/0'] === cat) : allProducts;
+  const filtered = activeCategory ? allProducts.filter(p => p['category'] === cat) : allProducts;
   document.getElementById('resultCount').textContent = filtered.length;
   buildCategories(allProducts);
   renderCards(filtered);
@@ -347,7 +347,7 @@ function renderCards(products) {
   const badges = ['BEST SELLER','POPULAIRE','TOP DEAL'];
   document.getElementById('productsGrid').innerHTML = products.slice(0,30).map((p,i) => {
     const badge = i < 3 ? badges[i] : (i%8===0?'NOUVEAU':'');
-    const img = p['medias/0/url'];
+    const img = p['image_url'];
     const productUrl = p.url || '#';
     const price = p.price ? `£${p.price}` : 'Voir prix';
     return `<div class="pcard" onclick="window.open('${productUrl}','_blank')">
@@ -358,7 +358,7 @@ function renderCards(products) {
       <div class="pcard-body">
         <div class="pcard-supplier">${p.fournisseur||'Vintage Wholesale Supply'}</div>
         <div class="pcard-title">${p.title||'Produit'}</div>
-        <div class="pcard-cat">${p['categories/0']||'Non catégorisé'}</div>
+        <div class="pcard-cat">${p['category']||'Non catégorisé'}</div>
         <div class="pcard-footer">
           <div><div class="pcard-price">${price}</div><div class="pcard-price-sub">Prix wholesale</div></div>
           <a class="pcard-action" href="${productUrl}" target="_blank" onclick="event.stopPropagation()">Voir →</a>
