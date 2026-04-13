@@ -269,6 +269,8 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 let allProducts = [];
 let activeCategory = null;
 let currentSlide = 0;
+let currentPage = 1;
+const PER_PAGE = 48;
 
 function goSlide(n) {
   document.getElementById('slide'+currentSlide).classList.remove('active');
@@ -328,6 +330,7 @@ function buildCategories(products) {
 
 function filterCat(cat) {
   activeCategory = activeCategory === cat ? null : cat;
+  currentPage = 1;
   const filtered = activeCategory ? allProducts.filter(p => p['category'] === cat) : allProducts;
   document.getElementById('resultCount').textContent = filtered.length;
   buildCategories(allProducts);
@@ -344,8 +347,12 @@ function renderCards(products) {
     document.getElementById('productsGrid').innerHTML = '<div class="error-state">Aucun résultat</div>';
     return;
   }
+  const totalPages = Math.ceil(products.length / PER_PAGE);
+  if (currentPage > totalPages) currentPage = 1;
+  const start = (currentPage - 1) * PER_PAGE;
+  const paginated = products.slice(start, start + PER_PAGE);
   const badges = ['BEST SELLER','POPULAIRE','TOP DEAL'];
-  document.getElementById('productsGrid').innerHTML = products.slice(0,30).map((p,i) => {
+  document.getElementById('productsGrid').innerHTML = paginated.map((p,i) => {
     const badge = i < 3 ? badges[i] : (i%8===0?'NOUVEAU':'');
     const img = p['image_url'];
     const productUrl = p.url || '#';
@@ -365,7 +372,19 @@ function renderCards(products) {
         </div>
       </div>
     </div>`;
-  }).join('');
+  }).join('') + `
+  <div style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:8px;padding:32px 0;border-top:2px solid var(--black);margin-top:8px;">
+    <button onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''} style="background:var(--black);color:white;border:none;padding:10px 20px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;letter-spacing:1px;cursor:pointer;opacity:${currentPage===1?'0.3':'1'}">← PRÉC</button>
+    <span style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;padding:0 16px;">PAGE ${currentPage} / ${totalPages}</span>
+    <button onclick="goPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''} style="background:var(--pink);color:white;border:none;padding:10px 20px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;letter-spacing:1px;cursor:pointer;opacity:${currentPage===totalPages?'0.3':'1'}">SUIV →</button>
+  </div>`;
+}
+
+function goPage(n) {
+  currentPage = n;
+  const filtered = activeCategory ? allProducts.filter(p => p['category'] === activeCategory) : allProducts;
+  renderCards(filtered);
+  window.scrollTo({top: document.querySelector('.products-area').offsetTop - 80, behavior: 'smooth'});
 }
 
 function sortProducts(val) {
@@ -376,6 +395,7 @@ function sortProducts(val) {
 }
 
 function searchProducts() {
+  currentPage = 1;
   fetchProducts(document.getElementById('searchInput').value.trim());
 }
 
