@@ -394,9 +394,103 @@ function sortProducts(val) {
   renderCards(s);
 }
 
+const SYNONYMES = {
+  // Pantalons
+  'pantalon': ['pant','trouser','jogger','cargo','chino','jean','denim','legging','tracksuit'],
+  'pantalons': ['pant','trouser','jogger','cargo','chino','jean','denim'],
+  'jean': ['jean','denim'],
+  'jeans': ['jean','denim'],
+  'jogging': ['jogger','tracksuit','track pant','jogging'],
+  'cargo': ['cargo'],
+  // Hauts
+  'tshirt': ['t-shirt','tshirt','tee'],
+  't-shirt': ['t-shirt','tshirt','tee'],
+  'tshirts': ['t-shirt','tshirt','tee'],
+  'chemise': ['shirt','chemise','flannel','western'],
+  'chemises': ['shirt','chemise','flannel'],
+  'pull': ['sweat','hoodie','knit','knitwear','jumper','pullover','sweater'],
+  'pulls': ['sweat','hoodie','knit','knitwear','jumper','pullover','sweater'],
+  'sweat': ['sweat','hoodie','pullover','crewneck'],
+  'sweats': ['sweat','hoodie','pullover','crewneck'],
+  'hoodie': ['hoodie','hoody','hooded','capuche'],
+  'hoodies': ['hoodie','hoody','hooded'],
+  'tricot': ['knit','knitwear','tricot','sweater','jumper'],
+  'polaire': ['fleece','polaire','polar'],
+  // Vestes
+  'veste': ['jacket','coat','parka','bomber','windbreaker','anorak','blazer'],
+  'vestes': ['jacket','coat','parka','bomber','windbreaker'],
+  'manteau': ['coat','jacket','parka','manteau'],
+  'manteaux': ['coat','jacket','parka'],
+  'blouson': ['jacket','bomber','blouson'],
+  'parka': ['parka','jacket'],
+  // Shorts
+  'short': ['short'],
+  'shorts': ['short'],
+  // Chaussures
+  'chaussure': ['shoe','boot','sneaker','trainer'],
+  'chaussures': ['shoe','boot','sneaker','trainer'],
+  'basket': ['sneaker','trainer','shoe'],
+  'baskets': ['sneaker','trainer','shoe'],
+  // Marques communes
+  'ralph': ['ralph'],
+  'lauren': ['lauren'],
+  'nike': ['nike'],
+  'adidas': ['adidas'],
+  'carhartt': ['carhartt'],
+  'tommy': ['tommy'],
+  'levis': ['levi'],
+  "levi's": ['levi'],
+  'wrangler': ['wrangler'],
+  'champion': ['champion'],
+  'northface': ['north face'],
+  // Divers
+  'cuir': ['leather','cuir'],
+  'sac': ['bag','sac','backpack'],
+  'sacs': ['bag','sac','backpack'],
+  'robe': ['dress','robe'],
+  'robes': ['dress','robe'],
+  'vintage': ['vintage','mix'],
+  'mix': ['mix'],
+};
+
+function translateSearch(query) {
+  const q = query.toLowerCase().trim();
+  // Cherche si le mot tapé est dans le dictionnaire
+  if (SYNONYMES[q]) {
+    return SYNONYMES[q];
+  }
+  // Sinon retourne le mot original
+  return [q];
+}
+
 function searchProducts() {
   currentPage = 1;
-  fetchProducts(document.getElementById('searchInput').value.trim());
+  const raw = document.getElementById('searchInput').value.trim();
+  const terms = translateSearch(raw);
+  fetchProductsMulti(terms);
+}
+
+async function fetchProductsMulti(terms) {
+  showLoading();
+  try {
+    // Construire une requête OR pour tous les termes
+    const orQuery = terms.map(t => `title.ilike.*${encodeURIComponent(t)}*`).join(',');
+    let url = `${SUPABASE_URL}/rest/v1/produits?select=title,category,image_url,fournisseur,url,price&or=(${orQuery})&limit=500`;
+    const res = await fetch(url, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    if (!res.ok) throw new Error('Erreur ' + res.status);
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) throw new Error('Aucune donnée');
+    allProducts = data;
+    updateUI(data);
+  } catch(e) {
+    document.getElementById('productsGrid').innerHTML = `<div class="error-state">⚠️ Aucun résultat pour cette recherche</div>`;
+  }
 }
 
 function setSearch(t) {
