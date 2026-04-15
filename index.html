@@ -397,121 +397,31 @@ function sortProducts(val) {
   renderCards(s);
 }
 
-const SYNONYMES = {
-  // Pantalons
-  'pantalon': ['pant','trouser','jogger','cargo','chino','jean','denim','legging','tracksuit'],
-  'pantalons': ['pant','trouser','jogger','cargo','chino','jean','denim'],
-  'jean': ['jean','denim'],
-  'jeans': ['jean','denim'],
-  'jogging': ['jogger','tracksuit','track pant','jogging'],
-  'cargo': ['cargo'],
-  // Hauts
-  'tshirt': ['t-shirt','tshirt','tee'],
-  't-shirt': ['t-shirt','tshirt','tee'],
-  'tshirts': ['t-shirt','tshirt','tee'],
-  'chemise': ['shirt','chemise','flannel','western'],
-  'chemises': ['shirt','chemise','flannel'],
-  'pull': ['sweat','hoodie','knit','knitwear','jumper','pullover','sweater'],
-  'pulls': ['sweat','hoodie','knit','knitwear','jumper','pullover','sweater'],
-  'sweat': ['sweat','hoodie','pullover','crewneck'],
-  'sweats': ['sweat','hoodie','pullover','crewneck'],
-  'hoodie': ['hoodie','hoody','hooded','capuche'],
-  'hoodies': ['hoodie','hoody','hooded'],
-  'tricot': ['knit','knitwear','tricot','sweater','jumper'],
-  'polaire': ['fleece','polaire','polar'],
-  // Vestes
-  'veste': ['jacket','coat','parka','bomber','windbreaker','anorak','blazer'],
-  'vestes': ['jacket','coat','parka','bomber','windbreaker'],
-  'manteau': ['coat','jacket','parka','manteau'],
-  'manteaux': ['coat','jacket','parka'],
-  'blouson': ['jacket','bomber','blouson'],
-  'parka': ['parka','jacket'],
-  // Shorts
-  'short': ['short'],
-  'shorts': ['short'],
-  // Chaussures
-  'chaussure': ['shoe','boot','sneaker','trainer'],
-  'chaussures': ['shoe','boot','sneaker','trainer'],
-  'basket': ['sneaker','trainer','shoe'],
-  'baskets': ['sneaker','trainer','shoe'],
-  // Marques communes
-  'ralph': ['ralph'],
-  'lauren': ['lauren'],
-  'nike': ['nike'],
-  'adidas': ['adidas'],
-  'carhartt': ['carhartt'],
-  'tommy': ['tommy'],
-  'levis': ['levi'],
-  "levi's": ['levi'],
-  'wrangler': ['wrangler'],
-  'champion': ['champion'],
-  'northface': ['north face'],
-  // Divers
-  'cuir': ['leather','cuir'],
-  'sac': ['bag','sac','backpack'],
-  'sacs': ['bag','sac','backpack'],
-  'robe': ['dress','robe'],
-  'robes': ['dress','robe'],
-  'vintage': ['vintage','mix'],
-  'mix': ['mix'],
-};
-
-function translateWord(word) {
-  const w = word.toLowerCase().trim();
-  return SYNONYMES[w] || [w];
-}
-
 function searchProducts() {
   currentPage = 1;
   const raw = document.getElementById('searchInput').value.trim();
   if (!raw) { fetchProducts(); return; }
-  
-  // Découper la recherche en mots
-  const words = raw.toLowerCase().trim().split(/\s+/);
-  
-  if (words.length === 1) {
-    // Un seul mot → cherche tous les synonymes (OR)
-    fetchProductsMulti(translateWord(words[0]));
-  } else {
-    // Plusieurs mots → traduit chaque mot puis filtre en AND
-    const translatedWords = words.map(w => translateWord(w));
-    fetchProductsAnd(translatedWords);
-  }
+  fetchProductsAndTags(raw);
 }
 
-async function fetchProductsMulti(terms) {
+async function fetchProductsAndTags(query) {
   showLoading();
   try {
-    const orQuery = terms.map(t => `title.ilike.*${encodeURIComponent(t)}*,tags.ilike.*${encodeURIComponent(t)}*`).join(',');
-    let url = `${SUPABASE_URL}/rest/v1/produits?select=title,category,image_url,fournisseur,url,price,tags&or=(${orQuery})&limit=10000`;
-    const res = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' } });
-    if (!res.ok) throw new Error('Erreur ' + res.status);
-    const data = await res.json();
-    if (!Array.isArray(data) || data.length === 0) throw new Error('Aucune donnée');
-    allProducts = data;
-    updateUI(data);
-  } catch(e) {
-    document.getElementById('productsGrid').innerHTML = `<div class="error-state">⚠️ Aucun résultat pour cette recherche</div>`;
-  }
-}
-
-async function fetchProductsAnd(translatedWords) {
-  showLoading();
-  try {
+    // Charger tous les produits
     let url = `${SUPABASE_URL}/rest/v1/produits?select=title,category,image_url,fournisseur,url,price,tags&limit=10000`;
     const res = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' } });
     if (!res.ok) throw new Error('Erreur ' + res.status);
     const data = await res.json();
-    
-    // Filtre : title OU tags doit contenir AU MOINS UN synonyme de CHAQUE mot
+
+    // Découper la recherche en mots et filtrer en AND
+    const words = query.toLowerCase().trim().split(/\s+/);
     const filtered = data.filter(p => {
       const title = (p.title || '').toLowerCase();
       const tags = (p.tags || '').toLowerCase();
-      return translatedWords.every(synonyms => 
-        synonyms.some(s => title.includes(s) || tags.includes(s))
-      );
+      // Chaque mot doit être trouvé dans title OU dans tags
+      return words.every(w => title.includes(w) || tags.includes(w));
     });
-    
+
     if (filtered.length === 0) throw new Error('Aucune donnée');
     allProducts = filtered;
     updateUI(filtered);
