@@ -285,7 +285,7 @@ setInterval(() => changeSlide(1), 4000);
 async function fetchProducts(search='') {
   showLoading();
   try {
-    let url = `${SUPABASE_URL}/rest/v1/produits?select=title,category,image_url,fournisseur,url,price&limit=500`;
+    let url = `${SUPABASE_URL}/rest/v1/produits?select=title,category,image_url,fournisseur,url,price&limit=10000`;
     if (search) url += `&title=ilike.*${encodeURIComponent(search)}*`;
     const res = await fetch(url, {
       headers: {
@@ -475,7 +475,7 @@ async function fetchProductsMulti(terms) {
   try {
     // Construire une requête OR pour tous les termes
     const orQuery = terms.map(t => `title.ilike.*${encodeURIComponent(t)}*`).join(',');
-    let url = `${SUPABASE_URL}/rest/v1/produits?select=title,category,image_url,fournisseur,url,price&or=(${orQuery})&limit=500`;
+    let url = `${SUPABASE_URL}/rest/v1/produits?select=title,category,image_url,fournisseur,url,price&or=(${orQuery})&limit=10000`;
     const res = await fetch(url, {
       headers: {
         'apikey': SUPABASE_KEY,
