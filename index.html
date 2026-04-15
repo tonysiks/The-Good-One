@@ -221,7 +221,7 @@ footer{background:var(--black);color:var(--white);padding:40px;display:flex;alig
 
 <div class="stats-bar">
   <div class="stat-item"><div class="stat-num" id="totalStat"><span>—</span></div><div class="stat-label">Produits indexés</div></div>
-  <div class="stat-item"><div class="stat-num"><span>1</span></div><div class="stat-label">Fournisseurs actifs</div></div>
+  <div class="stat-item"><div class="stat-num" id="supplierStat"><span>—</span></div><div class="stat-label">Fournisseurs actifs</div></div>
   <div class="stat-item"><div class="stat-num"><span>24</span>H</div><div class="stat-label">Mise à jour auto</div></div>
   <div class="stat-item"><div class="stat-num"><span>100</span>%</div><div class="stat-label">Wholesale vérifié</div></div>
 </div>
@@ -311,6 +311,9 @@ function updateUI(products) {
   document.getElementById('resultCount').textContent = products.length;
   document.getElementById('totalStat').innerHTML = `<span>${products.length}</span>`;
   document.getElementById('vwsCount').textContent = products.length;
+  // Compter les fournisseurs uniques
+  const suppliers = new Set(products.map(p => p.fournisseur)).size;
+  document.getElementById('supplierStat').innerHTML = `<span>${suppliers}</span>`;
   buildCategories(products);
   renderCards(products);
 }
