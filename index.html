@@ -453,41 +453,65 @@ const SYNONYMES = {
   'mix': ['mix'],
 };
 
-function translateSearch(query) {
-  const q = query.toLowerCase().trim();
-  // Cherche si le mot tapé est dans le dictionnaire
-  if (SYNONYMES[q]) {
-    return SYNONYMES[q];
-  }
-  // Sinon retourne le mot original
-  return [q];
+function translateWord(word) {
+  const w = word.toLowerCase().trim();
+  return SYNONYMES[w] || [w];
 }
 
 function searchProducts() {
   currentPage = 1;
   const raw = document.getElementById('searchInput').value.trim();
-  const terms = translateSearch(raw);
-  fetchProductsMulti(terms);
+  if (!raw) { fetchProducts(); return; }
+  
+  // Découper la recherche en mots
+  const words = raw.toLowerCase().trim().split(/\s+/);
+  
+  if (words.length === 1) {
+    // Un seul mot → cherche tous les synonymes (OR)
+    fetchProductsMulti(translateWord(words[0]));
+  } else {
+    // Plusieurs mots → traduit chaque mot puis filtre en AND
+    const translatedWords = words.map(w => translateWord(w));
+    fetchProductsAnd(translatedWords);
+  }
 }
 
 async function fetchProductsMulti(terms) {
   showLoading();
   try {
-    // Construire une requête OR pour tous les termes
     const orQuery = terms.map(t => `title.ilike.*${encodeURIComponent(t)}*`).join(',');
     let url = `${SUPABASE_URL}/rest/v1/produits?select=title,category,image_url,fournisseur,url,price&or=(${orQuery})&limit=10000`;
-    const res = await fetch(url, {
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    const res = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' } });
     if (!res.ok) throw new Error('Erreur ' + res.status);
     const data = await res.json();
     if (!Array.isArray(data) || data.length === 0) throw new Error('Aucune donnée');
     allProducts = data;
     updateUI(data);
+  } catch(e) {
+    document.getElementById('productsGrid').innerHTML = `<div class="error-state">⚠️ Aucun résultat pour cette recherche</div>`;
+  }
+}
+
+async function fetchProductsAnd(translatedWords) {
+  // Charge tous les produits puis filtre en JS avec AND
+  showLoading();
+  try {
+    let url = `${SUPABASE_URL}/rest/v1/produits?select=title,category,image_url,fournisseur,url,price&limit=10000`;
+    const res = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' } });
+    if (!res.ok) throw new Error('Erreur ' + res.status);
+    const data = await res.json();
+    
+    // Filtre : le titre doit contenir AU MOINS UN synonyme de CHAQUE mot
+    const filtered = data.filter(p => {
+      const title = (p.title || '').toLowerCase();
+      return translatedWords.every(synonyms => 
+        synonyms.some(s => title.includes(s))
+      );
+    });
+    
+    if (filtered.length === 0) throw new Error('Aucune donnée');
+    allProducts = filtered;
+    updateUI(filtered);
   } catch(e) {
     document.getElementById('productsGrid').innerHTML = `<div class="error-state">⚠️ Aucun résultat pour cette recherche</div>`;
   }
