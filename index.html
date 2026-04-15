@@ -285,8 +285,11 @@ setInterval(() => changeSlide(1), 4000);
 async function fetchProducts(search='') {
   showLoading();
   try {
-    let url = `${SUPABASE_URL}/rest/v1/produits?select=title,category,image_url,fournisseur,url,price&limit=10000`;
-    if (search) url += `&title=ilike.*${encodeURIComponent(search)}*`;
+    let url = `${SUPABASE_URL}/rest/v1/produits?select=title,category,image_url,fournisseur,url,price,tags&limit=10000`;
+    if (search) {
+      const s = encodeURIComponent(search);
+      url += `&or=(title.ilike.*${s}*,tags.ilike.*${s}*)`;
+    }
     const res = await fetch(url, {
       headers: {
         'apikey': SUPABASE_KEY,
@@ -479,8 +482,8 @@ function searchProducts() {
 async function fetchProductsMulti(terms) {
   showLoading();
   try {
-    const orQuery = terms.map(t => `title.ilike.*${encodeURIComponent(t)}*`).join(',');
-    let url = `${SUPABASE_URL}/rest/v1/produits?select=title,category,image_url,fournisseur,url,price&or=(${orQuery})&limit=10000`;
+    const orQuery = terms.map(t => `title.ilike.*${encodeURIComponent(t)}*,tags.ilike.*${encodeURIComponent(t)}*`).join(',');
+    let url = `${SUPABASE_URL}/rest/v1/produits?select=title,category,image_url,fournisseur,url,price,tags&or=(${orQuery})&limit=10000`;
     const res = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' } });
     if (!res.ok) throw new Error('Erreur ' + res.status);
     const data = await res.json();
@@ -493,19 +496,19 @@ async function fetchProductsMulti(terms) {
 }
 
 async function fetchProductsAnd(translatedWords) {
-  // Charge tous les produits puis filtre en JS avec AND
   showLoading();
   try {
-    let url = `${SUPABASE_URL}/rest/v1/produits?select=title,category,image_url,fournisseur,url,price&limit=10000`;
+    let url = `${SUPABASE_URL}/rest/v1/produits?select=title,category,image_url,fournisseur,url,price,tags&limit=10000`;
     const res = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' } });
     if (!res.ok) throw new Error('Erreur ' + res.status);
     const data = await res.json();
     
-    // Filtre : le titre doit contenir AU MOINS UN synonyme de CHAQUE mot
+    // Filtre : title OU tags doit contenir AU MOINS UN synonyme de CHAQUE mot
     const filtered = data.filter(p => {
       const title = (p.title || '').toLowerCase();
+      const tags = (p.tags || '').toLowerCase();
       return translatedWords.every(synonyms => 
-        synonyms.some(s => title.includes(s))
+        synonyms.some(s => title.includes(s) || tags.includes(s))
       );
     });
     
