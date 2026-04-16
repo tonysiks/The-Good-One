@@ -286,6 +286,8 @@ async function fetchProducts(search='') {
   showLoading();
   try {
     let url = `${SUPABASE_URL}/rest/v1/produits?select=title,category,image_url,fournisseur,url,price,tags,scraped_at&limit=10000`;
+    if (search) {
+      const s = encodeURIComponent(search);
       url += `&or=(title.ilike.*${s}*,tags.ilike.*${s}*)`;
     }
     const res = await fetch(url, {
@@ -310,7 +312,6 @@ function updateUI(products) {
   document.getElementById('resultCount').textContent = products.length;
   document.getElementById('totalStat').innerHTML = `<span>${products.length}</span>`;
   document.getElementById('vwsCount').textContent = products.length;
-  // Compter les fournisseurs uniques
   const suppliers = new Set(products.map(p => p.fournisseur)).size;
   document.getElementById('supplierStat').innerHTML = `<span>${suppliers}</span>`;
   buildCategories(products);
@@ -419,18 +420,15 @@ function searchProducts() {
 async function fetchProductsAndTags(query) {
   showLoading();
   try {
-    // Charger tous les produits
     let url = `${SUPABASE_URL}/rest/v1/produits?select=title,category,image_url,fournisseur,url,price,tags,scraped_at&limit=10000`;
     const res = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Range': '0-9999' } });
     if (!res.ok) throw new Error('Erreur ' + res.status);
     const data = await res.json();
 
-    // Découper la recherche en mots et filtrer en AND
     const words = query.toLowerCase().trim().split(/\s+/);
     const filtered = data.filter(p => {
       const title = (p.title || '').toLowerCase();
       const tags = (p.tags || '').toLowerCase();
-      // Chaque mot doit être trouvé dans title OU dans tags
       return words.every(w => title.includes(w) || tags.includes(w));
     });
 
