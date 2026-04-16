@@ -285,9 +285,7 @@ setInterval(() => changeSlide(1), 4000);
 async function fetchProducts(search='') {
   showLoading();
   try {
-    let url = `${SUPABASE_URL}/rest/v1/produits?select=title,category,image_url,fournisseur,url,price,tags&limit=10000`;
-    if (search) {
-      const s = encodeURIComponent(search);
+    let url = `${SUPABASE_URL}/rest/v1/produits?select=title,category,image_url,fournisseur,url,price,tags,scraped_at&limit=10000`;
       url += `&or=(title.ilike.*${s}*,tags.ilike.*${s}*)`;
     }
     const res = await fetch(url, {
@@ -349,6 +347,15 @@ function clearFilters() {
   updateUI(allProducts);
 }
 
+function timeAgo(dateStr) {
+  if (!dateStr) return '';
+  const diff = Math.floor((new Date() - new Date(dateStr)) / 1000);
+  if (diff < 3600) return `il y a ${Math.floor(diff/60)} min`;
+  if (diff < 86400) return `il y a ${Math.floor(diff/3600)}h`;
+  if (diff < 604800) return `il y a ${Math.floor(diff/86400)}j`;
+  return `il y a ${Math.floor(diff/604800)} sem`;
+}
+
 function renderCards(products) {
   if (!products.length) {
     document.getElementById('productsGrid').innerHTML = '<div class="error-state">Aucun résultat</div>';
@@ -364,13 +371,14 @@ function renderCards(products) {
     const img = p['image_url'];
     const productUrl = p.url || '#';
     const price = p.price ? `£${p.price}` : 'Voir prix';
+    const ago = timeAgo(p.scraped_at);
     return `<div class="pcard" onclick="window.open('${productUrl}','_blank')">
       ${badge?`<div class="pcard-badge ${i===2?'deal':''}">${badge}</div>`:''}
       <div class="pcard-img-wrap">
         ${img?`<img class="pcard-img" src="${img}" alt="${(p.title||'').replace(/"/g,'')}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=pcard-placeholder>🧥</div>'">`:`<div class="pcard-placeholder">🧥</div>`}
       </div>
       <div class="pcard-body">
-        <div class="pcard-supplier">${p.fournisseur||'Vintage Wholesale Supply'}</div>
+        <div class="pcard-supplier">${p.fournisseur||'Vintage Wholesale Supply'}${ago ? ` · <span style="font-weight:400;opacity:0.7">${ago}</span>` : ''}</div>
         <div class="pcard-title">${p.title||'Produit'}</div>
         <div class="pcard-cat">${p['category']||'Non catégorisé'}</div>
         <div class="pcard-footer">
@@ -412,7 +420,7 @@ async function fetchProductsAndTags(query) {
   showLoading();
   try {
     // Charger tous les produits
-    let url = `${SUPABASE_URL}/rest/v1/produits?select=title,category,image_url,fournisseur,url,price,tags&limit=10000`;
+    let url = `${SUPABASE_URL}/rest/v1/produits?select=title,category,image_url,fournisseur,url,price,tags,scraped_at&limit=10000`;
     const res = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Range': '0-9999' } });
     if (!res.ok) throw new Error('Erreur ' + res.status);
     const data = await res.json();
