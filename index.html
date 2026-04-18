@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Good One — Moteur de recherche wholesale fripe</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap');
+:root{--black:#0a0a0a;--white:#ffffff;--off-white:#f8f6f2;--blue:#0070F3;--blue-dark:#0057c2;--gray:#f0ede8;--gray2:#e0dcd6;--text:#1a1a1a;--muted:#888;--border:#e0dcd6;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--white);color:var(--text);font-family:'Barlow',sans-serif;overflow-x:hidden;}
+.announcement{background:var(--black);color:var(--white);text-align:center;padding:8px;font-size:12px;letter-spacing:1px;}
+.ticker-wrap{background:var(--blue);overflow:hidden;padding:10px 0;}
+.ticker{display:flex;animation:ticker 20s linear infinite;white-space:nowrap;width:max-content;}
+.ticker-item{color:white;font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:0 40px;flex-shrink:0;}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+nav{background:var(--white);border-bottom:2px solid var(--black);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:200;}
+.logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:24px;text-transform:uppercase;letter-spacing:2px;color:var(--black);}
+.logo span{color:var(--blue);}
+.nav-links{display:flex;gap:0;list-style:none;}
+.nav-links a{color:var(--text);text-decoration:none;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:0 18px;height:64px;display:flex;align-items:center;border-right:1px solid var(--border);transition:all 0.2s;}
+.nav-links a:hover{background:var(--gray);}
+.nav-links a.hot{color:var(--blue);}
+.nav-right{display:flex;gap:12px;align-items:center;}
+.btn-outline{background:transparent;border:2px solid var(--black);color:var(--black);padding:8px 20px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+.btn-outline:hover{background:var(--black);color:var(--white);}
+.btn-solid{background:var(--blue);border:2px solid var(--blue);color:var(--white);padding:8px 20px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+.btn-solid:hover{background:var(--blue-dark);}
+.hero-slider{position:relative;height:520px;overflow:hidden;background:var(--black);}
+.slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.8s ease;}
+.slide.active{opacity:1;}
+.slide-content{position:relative;text-align:center;color:var(--white);padding:40px;max-width:900px;}
+.slide-tag{display:inline-block;background:var(--blue);color:white;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:4px 16px;margin-bottom:20px;}
+.slide-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(52px,8vw,96px);text-transform:uppercase;line-height:0.9;margin-bottom:24px;}
+.slide-title em{font-style:italic;color:var(--blue);}
+.slide-btn{background:var(--white);color:var(--black);border:none;padding:14px 40px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+.slide-btn:hover{background:var(--blue);color:var(--white);}
+.slider-dots{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:10;}
+.dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.4);cursor:pointer;transition:all 0.2s;}
+.dot.active{background:var(--white);width:24px;border-radius:4px;}
+.slider-arrow{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.15);border:none;color:white;width:48px;height:48px;font-size:20px;cursor:pointer;z-index:10;transition:background 0.2s;backdrop-filter:blur(4px);}
+.slider-arrow:hover{background:var(--blue);}
+.slider-arrow.prev{left:20px;}
+.slider-arrow.next{right:20px;}
+.search-section{background:var(--black);padding:32px 40px;border-bottom:3px solid var(--blue);}
+.search-inner{max-width:900px;margin:0 auto;}
+.search-label{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--blue);margin-bottom:12px;}
+.search-bar{display:flex;border:2px solid var(--white);}
+.search-bar input{flex:1;background:transparent;border:none;outline:none;color:var(--white);font-size:18px;font-family:'Barlow',sans-serif;padding:14px 20px;}
+.search-bar input::placeholder{color:rgba(255,255,255,0.4);}
+.search-bar button{background:var(--blue);border:none;color:white;padding:0 32px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background 0.2s;}
+.search-bar button:hover{background:var(--blue-dark);}
+.search-tags{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+.stag{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);font-size:12px;font-weight:500;padding:5px 14px;cursor:pointer;transition:all 0.2s;}
+.stag:hover{background:var(--blue);border-color:var(--blue);color:white;}
+.brands-bar{background:var(--white);border-bottom:2px solid var(--black);padding:20px 40px;overflow:hidden;}
+.brands-scroll{display:flex;gap:48px;animation:brandScroll 25s linear infinite;width:max-content;}
+.brand-item{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;text-transform:uppercase;letter-spacing:2px;color:var(--black);opacity:0.5;cursor:pointer;white-space:nowrap;transition:opacity 0.2s;}
+.brand-item:hover{opacity:1;color:var(--blue);}
+@keyframes brandScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:2px solid var(--black);}
+.stat-item{padding:24px 32px;border-right:2px solid var(--black);text-align:center;}
+.stat-item:last-child{border-right:none;}
+.stat-num{font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:900;color:var(--black);line-height:1;}
+.stat-num span{color:var(--blue);}
+.stat-label{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+.main-layout{display:grid;grid-template-columns:280px 1fr;min-height:600px;border-top:2px solid var(--black);}
+.filters{border-right:2px solid var(--black);background:var(--white);}
+.filter-header{padding:20px 24px;border-bottom:2px solid var(--black);background:var(--black);font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--white);display:flex;align-items:center;justify-content:space-between;}
+.filter-clear{font-size:11px;color:var(--blue);cursor:pointer;letter-spacing:1px;}
+.filter-section{border-bottom:2px solid var(--black);padding:20px 24px;}
+.filter-section-title{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--black);margin-bottom:14px;}
+.filter-opt{display:flex;align-items:center;justify-content:space-between;padding:8px 0;cursor:pointer;font-size:13px;color:var(--muted);transition:color 0.15s;border-bottom:1px solid var(--gray2);}
+.filter-opt:last-child{border-bottom:none;}
+.filter-opt:hover{color:var(--blue);}
+.filter-opt.active{color:var(--black);font-weight:600;}
+.filter-opt-left{display:flex;align-items:center;gap:10px;}
+.f-check{width:16px;height:16px;border:2px solid var(--border);flex-shrink:0;transition:all 0.15s;}
+.filter-opt.active .f-check{background:var(--blue);border-color:var(--blue);}
+.f-count{font-size:11px;color:var(--muted);}
+.products-area{background:var(--off-white);padding:24px;}
+.products-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid var(--black);}
+.products-count{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;text-transform:uppercase;letter-spacing:1px;}
+.products-count span{color:var(--blue);}
+.sort-select{background:var(--white);border:2px solid var(--black);color:var(--black);padding:8px 16px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px;text-transform:uppercase;outline:none;cursor:pointer;}
+.products-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
+.pcard{background:var(--white);border:2px solid var(--white);cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;animation:fadeIn 0.4s ease both;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.pcard:nth-child(1){animation-delay:0.05s}.pcard:nth-child(2){animation-delay:0.1s}.pcard:nth-child(3){animation-delay:0.15s}
+.pcard:nth-child(4){animation-delay:0.2s}.pcard:nth-child(5){animation-delay:0.25s}.pcard:nth-child(6){animation-delay:0.3s}
+.pcard:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,0.12);z-index:2;}
+.pcard-img-wrap{position:relative;aspect-ratio:1;overflow:hidden;background:var(--gray);}
+.pcard-img{width:100%;height:100%;object-fit:cover;transition:transform 0.4s ease;}
+.pcard:hover .pcard-img{transform:scale(1.05);}
+.pcard-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:48px;color:var(--gray2);background:var(--gray);}
+.pcard-badge{position:absolute;top:10px;left:0;background:var(--blue);color:white;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;}
+.pcard-badge.deal{background:var(--black);}
+.pcard-body{padding:14px 16px 16px;}
+.pcard-supplier{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:6px;}
+.pcard-title{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:var(--black);margin-bottom:6px;line-height:1.1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.pcard-cat{font-size:12px;color:var(--muted);margin-bottom:12px;font-weight:500;}
+.pcard-footer{display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:2px solid var(--black);}
+.pcard-price{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:var(--black);}
+.pcard-price-sub{font-size:10px;color:var(--muted);font-family:'Barlow',sans-serif;}
+.pcard-action{background:var(--black);color:var(--white);border:none;padding:8px 14px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-block;}
+.pcard-action:hover{background:var(--blue);}
+.loading-state{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px;gap:16px;}
+.loading-bar{width:200px;height:3px;background:var(--gray2);overflow:hidden;}
+.loading-bar-inner{height:100%;background:var(--blue);animation:loadBar 1.2s ease-in-out infinite;}
+@keyframes loadBar{0%{width:0%;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0%;margin-left:100%}}
+.loading-text{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--muted);}
+.error-state{grid-column:1/-1;text-align:center;padding:60px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:2px;text-transform:uppercase;}
+.supplier-filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.sfbtn{background:var(--white);border:2px solid var(--black);color:var(--black);padding:8px 18px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+.sfbtn:hover{background:var(--black);color:var(--white);}
+.sfbtn.active{background:var(--blue);border-color:var(--blue);color:var(--white);}
+footer{background:var(--black);color:var(--white);padding:40px;display:flex;align-items:center;justify-content:space-between;border-top:3px solid var(--blue);}
+.footer-logo{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;text-transform:uppercase;letter-spacing:2px;}
+.footer-logo span{color:var(--blue);}
+.footer-text{font-size:12px;color:rgba(255,255,255,0.4);letter-spacing:1px;}
+</style>
+</head>
+<body>
+
+<div class="announcement">🚀 THE GOOD ONE — Le moteur de recherche #1 du wholesale fripe</div>
+
+<div class="ticker-wrap">
+  <div class="ticker">
+    <span class="ticker-item">🔥 NOUVEAU STOCK CHAQUE SEMAINE</span>
+    <span class="ticker-item">✈️ LIVRAISON INTERNATIONALE</span>
+    <span class="ticker-item">💎 +500 FOURNISSEURS INDEXÉS</span>
+    <span class="ticker-item">⚡ ALERTES EN TEMPS RÉEL</span>
+    <span class="ticker-item">🔥 MEILLEURS PRIX DU MARCHÉ</span>
+    <span class="ticker-item">✈️ LIVRAISON INTERNATIONALE</span>
+    <span class="ticker-item">💎 +500 FOURNISSEURS INDEXÉS</span>
+    <span class="ticker-item">⚡ ALERTES EN TEMPS RÉEL</span>
+    <span class="ticker-item">🔥 NOUVEAU STOCK CHAQUE SEMAINE</span>
+    <span class="ticker-item">✈️ LIVRAISON INTERNATIONALE</span>
+    <span class="ticker-item">💎 +500 FOURNISSEURS INDEXÉS</span>
+    <span class="ticker-item">⚡ ALERTES EN TEMPS RÉEL</span>
+  </div>
+</div>
+
+<nav>
+  <div class="logo">THE GOOD <span>ONE</span></div>
+  <ul class="nav-links">
+    <li><a href="#" class="hot">🔥 Meilleures offres</a></li>
+    <li><a href="#">Par marque</a></li>
+    <li><a href="#">Par catégorie</a></li>
+    <li><a href="#">Fournisseurs</a></li>
+    <li><a href="#">Alertes prix</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="btn-outline">Connexion</button>
+    <button class="btn-solid">S'abonner</button>
+  </div>
+</nav>
+
+<div class="hero-slider">
+  <div class="slide active" id="slide0">
+    <div style="position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1400') center/cover;filter:brightness(0.35);"></div>
+    <div class="slide-content">
+      <div class="slide-tag">⚡ Moteur de recherche wholesale</div>
+      <div class="slide-title">TROUVE LES<br><em>MEILLEURES</em><br>OFFRES FRIPE</div>
+      <button class="slide-btn" onclick="document.getElementById('searchInput').focus()">RECHERCHER MAINTENANT</button>
+    </div>
+  </div>
+  <div class="slide" id="slide1">
+    <div style="position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=1400') center/cover;filter:brightness(0.35);"></div>
+    <div class="slide-content">
+      <div class="slide-tag">🏷️ Ralph Lauren · Nike · Carhartt</div>
+      <div class="slide-title">+500<br><em>FOURNISSEURS</em><br>INDEXÉS</div>
+      <button class="slide-btn">VOIR LE CATALOGUE</button>
+    </div>
+  </div>
+  <div class="slide" id="slide2">
+    <div style="position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1400') center/cover;filter:brightness(0.35);"></div>
+    <div class="slide-content">
+      <div class="slide-tag">🔔 Alertes personnalisées</div>
+      <div class="slide-title">NE RATE<br><em>AUCUNE</em><br>OPPORTUNITÉ</div>
+      <button class="slide-btn">CRÉER MON ALERTE</button>
+    </div>
+  </div>
+  <button class="slider-arrow prev" onclick="changeSlide(-1)">←</button>
+  <button class="slider-arrow next" onclick="changeSlide(1)">→</button>
+  <div class="slider-dots">
+    <div class="dot active" onclick="goSlide(0)"></div>
+    <div class="dot" onclick="goSlide(1)"></div>
+    <div class="dot" onclick="goSlide(2)"></div>
+  </div>
+</div>
+
+<div class="search-section">
+  <div class="search-inner">
+    <div class="search-label">🔍 Recherche globale — tous fournisseurs</div>
+    <div class="search-bar">
+      <input id="searchInput" type="text" placeholder="Ex: polo Ralph Lauren, Nike mix, Carhartt bale..." />
+      <button onclick="searchProducts()">Rechercher</button>
+    </div>
+    <div class="search-tags">
+      <span class="stag" onclick="setSearch('Ralph Lauren')">Ralph Lauren</span>
+      <span class="stag" onclick="setSearch('Nike')">Nike</span>
+      <span class="stag" onclick="setSearch('Carhartt')">Carhartt</span>
+      <span class="stag" onclick="setSearch('Levi')">Levi's</span>
+      <span class="stag" onclick="setSearch('Tommy')">Tommy Hilfiger</span>
+      <span class="stag" onclick="setSearch('North Face')">The North Face</span>
+      <span class="stag" onclick="setSearch('mix')">Mix Vintage</span>
+      <span class="stag" onclick="setSearch('polo')">Polo</span>
+    </div>
+  </div>
+</div>
+
+<div class="brands-bar">
+  <div class="brands-scroll">
+    <span class="brand-item">Carhartt</span><span class="brand-item">Ralph Lauren</span><span class="brand-item">Nike</span>
+    <span class="brand-item">Levi's</span><span class="brand-item">The North Face</span><span class="brand-item">Tommy Hilfiger</span>
+    <span class="brand-item">Adidas</span><span class="brand-item">Dickies</span><span class="brand-item">Lacoste</span>
+    <span class="brand-item">Wrangler</span><span class="brand-item">Champion</span><span class="brand-item">Patagonia</span>
+    <span class="brand-item">Carhartt</span><span class="brand-item">Ralph Lauren</span><span class="brand-item">Nike</span>
+    <span class="brand-item">Levi's</span><span class="brand-item">The North Face</span><span class="brand-item">Tommy Hilfiger</span>
+    <span class="brand-item">Adidas</span><span class="brand-item">Dickies</span><span class="brand-item">Lacoste</span>
+    <span class="brand-item">Wrangler</span><span class="brand-item">Champion</span><span class="brand-item">Patagonia</span>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-item"><div class="stat-num" id="totalStat"><span>—</span></div><div class="stat-label">Produits indexés</div></div>
+  <div class="stat-item"><div class="stat-num" id="supplierStat"><span>—</span></div><div class="stat-label">Fournisseurs actifs</div></div>
+  <div class="stat-item"><div class="stat-num"><span>24</span>H</div><div class="stat-label">Mise à jour auto</div></div>
+  <div class="stat-item"><div class="stat-num"><span>100</span>%</div><div class="stat-label">Wholesale vérifié</div></div>
+</div>
+
+<div class="main-layout">
+  <aside class="filters">
+    <div class="filter-header">Filtres <span class="filter-clear" onclick="clearFilters()">Effacer</span></div>
+    <div class="filter-section">
+      <div class="filter-section-title">Catégorie</div>
+      <div id="categoryFilters"><div class="loading-text" style="font-size:11px;padding:8px 0;">Chargement...</div></div>
+    </div>
+    <div class="filter-section">
+      <div class="filter-section-title">Fournisseur</div>
+      <div class="filter-opt active">
+        <div class="filter-opt-left"><div class="f-check"></div>Vintage Wholesale Supply</div>
+        <span class="f-count" id="vwsCount">—</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="products-area">
+    <div class="products-toolbar">
+      <div class="products-count"><span id="resultCount">—</span> offres trouvées</div>
+      <select class="sort-select" onchange="sortProducts(this.value)">
+        <option value="default">Pertinence</option>
+        <option value="title-asc">A → Z</option>
+        <option value="title-desc">Z → A</option>
+      </select>
+    </div>
+    <div class="supplier-filters">
+      <button class="sfbtn active" onclick="filterSupplier(null, this)">Tous</button>
+      <button class="sfbtn" onclick="filterSupplier('Vintage Wholesale Supply', this)">Vintage Wholesale Supply</button>
+      <button class="sfbtn" onclick="filterSupplier('Wing999', this)">Wing999</button>
+      <button class="sfbtn" onclick="filterSupplier('Syed Vintage', this)">Syed Vintage</button>
+    </div>
+    <div class="products-grid" id="productsGrid">
+      <div class="loading-state"><div class="loading-bar"><div class="loading-bar-inner"></div></div><div class="loading-text">Chargement des offres...</div></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">THE GOOD <span>ONE</span></div>
+  <div class="footer-text">© 2026 · Le moteur de recherche du wholesale fripe</div>
+</footer>
+
+<script>
+const SUPABASE_URL = 'https://awzbegybkjfyobilvpgc.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3emJlZ3lia2pmeW9iaWx2cGdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NjM3MjcsImV4cCI6MjA5MTUzOTcyN30.NENJdd9sZiyoh7vR4j-msWJ8u0uLFxnz4s-6qYmUkuM';
+
+let allProducts = [];
+let activeCategory = null;
+let activeSupplier = null;
+let currentSlide = 0;
+let currentPage = 1;
+const PER_PAGE = 48;
+
+function goSlide(n) {
+  document.getElementById('slide'+currentSlide).classList.remove('active');
+  document.querySelectorAll('.dot')[currentSlide].classList.remove('active');
+  currentSlide = n;
+  document.getElementById('slide'+currentSlide).classList.add('active');
+  document.querySelectorAll('.dot')[currentSlide].classList.add('active');
+}
+function changeSlide(d) { goSlide((currentSlide+d+3)%3); }
+setInterval(() => changeSlide(1), 4000);
+
+async function fetchProducts(search='') {
+  showLoading();
+  try {
+    let url = `${SUPABASE_URL}/rest/v1/produits?select=title,category,image_url,fournisseur,url,price,tags,scraped_at&limit=10000`;
+    if (search) {
+      const s = encodeURIComponent(search);
+      url += `&or=(title.ilike.*${s}*,tags.ilike.*${s}*)`;
+    }
+    const res = await fetch(url, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Range': '0-9999'
+      }
+    });
+    if (!res.ok) throw new Error('Erreur ' + res.status);
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) throw new Error('Aucune donnée');
+    allProducts = data;
+    updateUI(data);
+  } catch(e) {
+    document.getElementById('productsGrid').innerHTML = `<div class="error-state">⚠️ Erreur : ${e.message}</div>`;
+  }
+}
+
+function updateUI(products) {
+  document.getElementById('resultCount').textContent = products.length;
+  document.getElementById('totalStat').innerHTML = `<span>${products.length}</span>`;
+  document.getElementById('vwsCount').textContent = products.length;
+  const suppliers = new Set(products.map(p => p.fournisseur)).size;
+  document.getElementById('supplierStat').innerHTML = `<span>${suppliers}</span>`;
+  buildCategories(products);
+  renderCards(products);
+}
+
+function showLoading() {
+  document.getElementById('productsGrid').innerHTML = `<div class="loading-state"><div class="loading-bar"><div class="loading-bar-inner"></div></div><div class="loading-text">Chargement...</div></div>`;
+}
+
+function buildCategories(products) {
+  const cats = {};
+  products.forEach(p => { const c = p['category'] || 'Autre'; cats[c] = (cats[c]||0)+1; });
+  document.getElementById('categoryFilters').innerHTML = Object.entries(cats)
+    .sort((a,b) => b[1]-a[1]).slice(0,10)
+    .map(([c,n]) => `
+      <div class="filter-opt ${activeCategory===c?'active':''}" onclick="filterCat('${c.replace(/'/g,"\\'")}')">
+        <div class="filter-opt-left"><div class="f-check"></div>${c}</div>
+        <span class="f-count">${n}</span>
+      </div>`).join('');
+}
+
+function getFiltered() {
+  let products = allProducts;
+  if (activeSupplier) products = products.filter(p => p.fournisseur === activeSupplier);
+  if (activeCategory) products = products.filter(p => p['category'] === activeCategory);
+  return products;
+}
+
+function filterSupplier(supplier, btn) {
+  activeSupplier = supplier;
+  activeCategory = null;
+  currentPage = 1;
+  document.querySelectorAll('.sfbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const filtered = getFiltered();
+  document.getElementById('resultCount').textContent = filtered.length;
+  buildCategories(activeSupplier ? allProducts.filter(p => p.fournisseur === activeSupplier) : allProducts);
+  renderCards(filtered);
+}
+
+function filterCat(cat) {
+  activeCategory = activeCategory === cat ? null : cat;
+  currentPage = 1;
+  const filtered = getFiltered();
+  document.getElementById('resultCount').textContent = filtered.length;
+  buildCategories(activeSupplier ? allProducts.filter(p => p.fournisseur === activeSupplier) : allProducts);
+  renderCards(filtered);
+}
+
+function clearFilters() {
+  activeCategory = null;
+  activeSupplier = null;
+  document.querySelectorAll('.sfbtn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.sfbtn').classList.add('active');
+  updateUI(allProducts);
+}
+
+function timeAgo(dateStr) {
+  if (!dateStr) return '';
+  const diff = Math.floor((new Date() - new Date(dateStr)) / 1000);
+  if (diff < 3600) return `il y a ${Math.floor(diff/60)} min`;
+  if (diff < 86400) return `il y a ${Math.floor(diff/3600)}h`;
+  if (diff < 604800) return `il y a ${Math.floor(diff/86400)}j`;
+  return `il y a ${Math.floor(diff/604800)} sem`;
+}
+
+function renderCards(products) {
+  if (!products.length) {
+    document.getElementById('productsGrid').innerHTML = '<div class="error-state">Aucun résultat</div>';
+    return;
+  }
+  const totalPages = Math.ceil(products.length / PER_PAGE);
+  if (currentPage > totalPages) currentPage = 1;
+  const start = (currentPage - 1) * PER_PAGE;
+  const paginated = products.slice(start, start + PER_PAGE);
+  const badges = ['BEST SELLER','POPULAIRE','TOP DEAL'];
+  document.getElementById('productsGrid').innerHTML = paginated.map((p,i) => {
+    const badge = i < 3 ? badges[i] : (i%8===0?'NOUVEAU':'');
+    const img = p['image_url'];
+    const productUrl = p.url || '#';
+    const price = p.price ? `£${p.price}` : 'Voir prix';
+    const ago = timeAgo(p.scraped_at);
+    return `<div class="pcard" onclick="window.open('${productUrl}','_blank')">
+      ${badge?`<div class="pcard-badge ${i===2?'deal':''}">${badge}</div>`:''}
+      <div class="pcard-img-wrap">
+        ${img?`<img class="pcard-img" src="${img}" alt="${(p.title||'').replace(/"/g,'')}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=pcard-placeholder>🧥</div>'">`:`<div class="pcard-placeholder">🧥</div>`}
+      </div>
+      <div class="pcard-body">
+        <div class="pcard-supplier">${p.fournisseur||'Vintage Wholesale Supply'}${ago ? ` · <span style="font-weight:400;opacity:0.7">${ago}</span>` : ''}</div>
+        <div class="pcard-title">${p.title||'Produit'}</div>
+        <div class="pcard-cat">${p['category']||'Non catégorisé'}</div>
+        <div class="pcard-footer">
+          <div><div class="pcard-price">${price}</div><div class="pcard-price-sub">Prix wholesale</div></div>
+          <a class="pcard-action" href="${productUrl}" target="_blank" onclick="event.stopPropagation()">Voir →</a>
+        </div>
+      </div>
+    </div>`;
+  }).join('') + `
+  <div style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:8px;padding:32px 0;border-top:2px solid var(--black);margin-top:8px;">
+    <button onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''} style="background:var(--black);color:white;border:none;padding:10px 20px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;letter-spacing:1px;cursor:pointer;opacity:${currentPage===1?'0.3':'1'}">← PRÉC</button>
+    <span style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;padding:0 16px;">PAGE ${currentPage} / ${totalPages}</span>
+    <button onclick="goPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''} style="background:var(--blue);color:white;border:none;padding:10px 20px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;letter-spacing:1px;cursor:pointer;opacity:${currentPage===totalPages?'0.3':'1'}">SUIV →</button>
+  </div>`;
+}
+
+function goPage(n) {
+  currentPage = n;
+  renderCards(getFiltered());
+  window.scrollTo({top: document.querySelector('.products-area').offsetTop - 80, behavior: 'smooth'});
+}
+
+function sortProducts(val) {
+  let s = [...getFiltered()];
+  if (val==='title-asc') s.sort((a,b)=>(a.title||'').localeCompare(b.title||''));
+  if (val==='title-desc') s.sort((a,b)=>(b.title||'').localeCompare(a.title||''));
+  renderCards(s);
+}
+
+function searchProducts() {
+  currentPage = 1;
+  const raw = document.getElementById('searchInput').value.trim();
+  if (!raw) { fetchProducts(); return; }
+  fetchProductsAndTags(raw);
+}
+
+async function fetchProductsAndTags(query) {
+  showLoading();
+  try {
+    let url = `${SUPABASE_URL}/rest/v1/produits?select=title,category,image_url,fournisseur,url,price,tags,scraped_at&limit=10000`;
+    const res = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Range': '0-9999' } });
+    if (!res.ok) throw new Error('Erreur ' + res.status);
+    const data = await res.json();
+    const words = query.toLowerCase().trim().split(/\s+/);
+    const filtered = data.filter(p => {
+      const title = (p.title || '').toLowerCase();
+      const tags = (p.tags || '').toLowerCase();
+      return words.every(w => title.includes(w) || tags.includes(w));
+    });
+    if (filtered.length === 0) throw new Error('Aucune donnée');
+    allProducts = filtered;
+    updateUI(filtered);
+  } catch(e) {
+    document.getElementById('productsGrid').innerHTML = `<div class="error-state">⚠️ Aucun résultat pour cette recherche</div>`;
+  }
+}
+
+function setSearch(t) {
+  document.getElementById('searchInput').value = t;
+  searchProducts();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('searchInput').addEventListener('keydown', e => { if(e.key==='Enter') searchProducts(); });
+  fetchProducts();
+});
+</script>
+</body>
+</html>
