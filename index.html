@@ -110,6 +110,10 @@ nav{background:var(--white);border-bottom:2px solid var(--black);padding:0 40px;
 @keyframes loadBar{0%{width:0%;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0%;margin-left:100%}}
 .loading-text{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--muted);}
 .error-state{grid-column:1/-1;text-align:center;padding:60px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:2px;text-transform:uppercase;}
+.supplier-filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.sfbtn{background:var(--white);border:2px solid var(--black);color:var(--black);padding:8px 18px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+.sfbtn:hover{background:var(--black);color:var(--white);}
+.sfbtn.active{background:var(--pink);border-color:var(--pink);color:var(--white);}
 footer{background:var(--black);color:var(--white);padding:40px;display:flex;align-items:center;justify-content:space-between;border-top:3px solid var(--pink);}
 .footer-logo{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;text-transform:uppercase;letter-spacing:2px;}
 .footer-logo span{color:var(--pink);}
@@ -251,6 +255,12 @@ footer{background:var(--black);color:var(--white);padding:40px;display:flex;alig
         <option value="title-desc">Z → A</option>
       </select>
     </div>
+    <div class="supplier-filters">
+      <button class="sfbtn active" onclick="filterSupplier(null, this)">Tous</button>
+      <button class="sfbtn" onclick="filterSupplier('Vintage Wholesale Supply', this)">Vintage Wholesale Supply</button>
+      <button class="sfbtn" onclick="filterSupplier('Wing999', this)">Wing999</button>
+      <button class="sfbtn" onclick="filterSupplier('Syed Vintage', this)">Syed Vintage</button>
+    </div>
     <div class="products-grid" id="productsGrid">
       <div class="loading-state"><div class="loading-bar"><div class="loading-bar-inner"></div></div><div class="loading-text">Chargement des offres...</div></div>
     </div>
@@ -268,6 +278,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 let allProducts = [];
 let activeCategory = null;
+let activeSupplier = null;
 let currentSlide = 0;
 let currentPage = 1;
 const PER_PAGE = 48;
@@ -334,17 +345,39 @@ function buildCategories(products) {
       </div>`).join('');
 }
 
+function getFiltered() {
+  let products = allProducts;
+  if (activeSupplier) products = products.filter(p => p.fournisseur === activeSupplier);
+  if (activeCategory) products = products.filter(p => p['category'] === activeCategory);
+  return products;
+}
+
+function filterSupplier(supplier, btn) {
+  activeSupplier = supplier;
+  activeCategory = null;
+  currentPage = 1;
+  document.querySelectorAll('.sfbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const filtered = getFiltered();
+  document.getElementById('resultCount').textContent = filtered.length;
+  buildCategories(activeSupplier ? allProducts.filter(p => p.fournisseur === activeSupplier) : allProducts);
+  renderCards(filtered);
+}
+
 function filterCat(cat) {
   activeCategory = activeCategory === cat ? null : cat;
   currentPage = 1;
-  const filtered = activeCategory ? allProducts.filter(p => p['category'] === cat) : allProducts;
+  const filtered = getFiltered();
   document.getElementById('resultCount').textContent = filtered.length;
-  buildCategories(allProducts);
+  buildCategories(activeSupplier ? allProducts.filter(p => p.fournisseur === activeSupplier) : allProducts);
   renderCards(filtered);
 }
 
 function clearFilters() {
   activeCategory = null;
+  activeSupplier = null;
+  document.querySelectorAll('.sfbtn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.sfbtn').classList.add('active');
   updateUI(allProducts);
 }
 
@@ -398,13 +431,12 @@ function renderCards(products) {
 
 function goPage(n) {
   currentPage = n;
-  const filtered = activeCategory ? allProducts.filter(p => p['category'] === activeCategory) : allProducts;
-  renderCards(filtered);
+  renderCards(getFiltered());
   window.scrollTo({top: document.querySelector('.products-area').offsetTop - 80, behavior: 'smooth'});
 }
 
 function sortProducts(val) {
-  let s = [...allProducts];
+  let s = [...getFiltered()];
   if (val==='title-asc') s.sort((a,b)=>(a.title||'').localeCompare(b.title||''));
   if (val==='title-desc') s.sort((a,b)=>(b.title||'').localeCompare(a.title||''));
   renderCards(s);
