@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Good One — Admin</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f4f0; color: #1a1a18; min-height: 100vh; }
+
+    /* LOGIN */
+    #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
+    .login-card { background: #fff; border: 1px solid #e0ded7; border-radius: 14px; padding: 2rem 2.5rem; width: 320px; }
+    .login-card h1 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+    .login-card p { font-size: 13px; color: #888780; margin-bottom: 20px; }
+    .login-card input { width: 100%; padding: 10px 12px; border: 1px solid #d3d1c7; border-radius: 8px; font-size: 14px; margin-bottom: 10px; outline: none; }
+    .login-card input:focus { border-color: #378ADD; }
+    .login-card button { width: 100%; padding: 10px; background: #1a1a18; color: #fff; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: 500; }
+    .login-card button:hover { background: #333; }
+    #login-error { font-size: 13px; color: #e24b4a; margin-top: 8px; display: none; }
+
+    /* DASHBOARD */
+    #dashboard { display: none; max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #e0ded7; }
+    .top-bar h1 { font-size: 20px; font-weight: 600; }
+    .top-bar-right { display: flex; align-items: center; gap: 12px; }
+    #last-sync { font-size: 13px; color: #888780; }
+    .logout-btn { font-size: 13px; padding: 6px 14px; border: 1px solid #d3d1c7; border-radius: 8px; background: transparent; cursor: pointer; color: #5f5e5a; }
+    .logout-btn:hover { background: #f1efe8; }
+
+    .sync-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #5f5e5a; margin-bottom: 1.5rem; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+    .dot-green { background: #22c55e; }
+
+    /* STATS */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
+    .stat-card { background: #edecea; border-radius: 10px; padding: 1rem; }
+    .stat-card .label { font-size: 12px; color: #888780; margin-bottom: 6px; }
+    .stat-card .value { font-size: 26px; font-weight: 600; color: #1a1a18; }
+    .stat-card .sub { font-size: 12px; color: #b4b2a9; margin-top: 2px; }
+
+    /* FOURNISSEURS */
+    .section-title { font-size: 11px; font-weight: 600; color: #888780; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+    .fournisseur-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
+    .fournisseur-card { background: #fff; border: 1px solid #e0ded7; border-radius: 12px; padding: 1rem 1.25rem; }
+    .fournisseur-card .fname { font-size: 13px; font-weight: 600; margin-bottom: 8px; color: #1a1a18; }
+    .fournisseur-card .fcount { font-size: 24px; font-weight: 600; color: #1a1a18; }
+    .fournisseur-card .flabel { font-size: 12px; color: #888780; }
+    .fournisseur-card .fpct { font-size: 12px; color: #b4b2a9; margin-top: 6px; }
+    .bar-bg { height: 4px; border-radius: 2px; background: #e0ded7; margin-top: 8px; }
+    .bar-fill { height: 4px; border-radius: 2px; }
+
+    /* LOGS */
+    .logs-wrapper { background: #fff; border: 1px solid #e0ded7; border-radius: 12px; overflow: hidden; margin-bottom: 1.5rem; }
+    .log-row { padding: 10px 16px; border-bottom: 1px solid #f1efe8; font-size: 13px; display: flex; align-items: center; gap: 10px; }
+    .log-row:last-child { border-bottom: none; }
+    .log-time { color: #b4b2a9; font-size: 12px; margin-left: auto; }
+    .badge { display: inline-flex; align-items: center; font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+    .badge-green { background: #eaf3de; color: #3b6d11; }
+    .badge-amber { background: #faeeda; color: #854f0b; }
+
+    /* TABLE */
+    .table-wrapper { background: #fff; border: 1px solid #e0ded7; border-radius: 12px; overflow: hidden; }
+    .table-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #e0ded7; }
+    .table-header span { font-size: 14px; font-weight: 600; }
+    .table-controls { display: flex; gap: 8px; align-items: center; }
+    select.filter-select { font-size: 13px; padding: 6px 10px; border: 1px solid #d3d1c7; border-radius: 8px; background: #f5f4f0; color: #1a1a18; outline: none; }
+    input.search-input { padding: 6px 10px; border: 1px solid #d3d1c7; border-radius: 8px; font-size: 13px; background: #f5f4f0; color: #1a1a18; width: 200px; outline: none; }
+    input.search-input:focus, select.filter-select:focus { border-color: #378ADD; }
+    table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 13px; }
+    th { padding: 8px 16px; text-align: left; font-size: 11px; font-weight: 600; color: #888780; text-transform: uppercase; letter-spacing: 0.05em; background: #f5f4f0; border-bottom: 1px solid #e0ded7; }
+    td { padding: 10px 16px; border-bottom: 1px solid #f1efe8; color: #1a1a18; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafaf8; }
+    .tag-pill { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; background: #f1efe8; color: #5f5e5a; margin-right: 3px; }
+    .btn-del { font-size: 12px; padding: 4px 10px; border-radius: 6px; border: 1px solid #f09595; color: #a32d2d; background: transparent; cursor: pointer; }
+    .btn-del:hover { background: #fcebeb; }
+    .pagination { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; font-size: 13px; color: #888780; border-top: 1px solid #e0ded7; }
+    .pagination button { font-size: 12px; padding: 5px 12px; border: 1px solid #d3d1c7; border-radius: 6px; background: transparent; cursor: pointer; color: #5f5e5a; }
+    .pagination button:hover:not(:disabled) { background: #f1efe8; }
+    .pagination button:disabled { opacity: 0.4; cursor: default; }
+
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #e0ded7; border-top-color: #888780; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    a.prod-link { color: #185fa5; text-decoration: none; }
+    a.prod-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-card">
+    <h1>The Good One</h1>
+    <p>Dashboard admin — accès restreint</p>
+    <input type="password" id="pwd-input" placeholder="Mot de passe" />
+    <button onclick="checkLogin()">Connexion</button>
+    <div id="login-error">Mot de passe incorrect.</div>
+  </div>
+</div>
+
+<div id="dashboard">
+  <div class="top-bar">
+    <h1>The Good One — Admin</h1>
+    <div class="top-bar-right">
+      <span id="last-sync">Dernière synchro : —</span>
+      <button class="logout-btn" onclick="logout()">Déconnexion</button>
+    </div>
+  </div>
+
+  <div class="sync-row">
+    <span class="dot dot-green"></span>
+    <span>Supabase connecté</span>
+    <span id="total-tag-null" style="margin-left:auto;font-size:12px;color:#854f0b;"></span>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card"><div class="label">Produits total</div><div class="value" id="stat-total"><span class="spinner"></span></div><div class="sub">en base</div></div>
+    <div class="stat-card"><div class="label">Fournisseurs</div><div class="value">3</div><div class="sub">actifs</div></div>
+    <div class="stat-card"><div class="label">Tags NULL</div><div class="value" id="stat-tags-null"><span class="spinner"></span></div><div class="sub">à générer</div></div>
+    <div class="stat-card"><div class="label">Ajoutés (7j)</div><div class="value" id="stat-7j"><span class="spinner"></span></div><div class="sub">nouveaux</div></div>
+  </div>
+
+  <div class="section-title">Répartition par fournisseur</div>
+  <div class="fournisseur-grid" id="fournisseur-grid">
+    <div class="fournisseur-card"><div class="fname">Chargement…</div></div>
+  </div>
+
+  <div class="section-title">Logs cron (derniers runs)</div>
+  <div class="logs-wrapper" id="logs-wrapper">
+    <div class="log-row"><span class="spinner"></span><span style="color:#888780">Chargement…</span></div>
+  </div>
+
+  <div style="margin-top:1.5rem;">
+    <div class="table-wrapper">
+      <div class="table-header">
+        <span>Produits</span>
+        <div class="table-controls">
+          <select class="filter-select" id="filter-fournisseur">
+            <option value="">Tous les fournisseurs</option>
+            <option value="Vintage Wholesale Supply">VWS</option>
+            <option value="Wing999">Wing999</option>
+            <option value="Syed Vintage">Syed Vintage</option>
+          </select>
+          <input class="search-input" type="text" id="search-input" placeholder="Rechercher un produit…" />
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:34%">Titre</th>
+            <th style="width:16%">Fournisseur</th>
+            <th style="width:10%">Prix</th>
+            <th style="width:20%">Tags</th>
+            <th style="width:13%">Ajouté le</th>
+            <th style="width:7%"></th>
+          </tr>
+        </thead>
+        <tbody id="products-tbody">
+          <tr><td colspan="6" style="text-align:center;padding:24px;color:#888780"><span class="spinner"></span></td></tr>
+        </tbody>
+      </table>
+      <div class="pagination">
+        <span id="pagination-info">—</span>
+        <div style="display:flex;gap:6px;">
+          <button id="btn-prev" onclick="changePage(-1)" disabled>← Préc.</button>
+          <button id="btn-next" onclick="changePage(1)">Suiv. →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://awzbegybkjfyobilvpgc.supabase.co';
+  const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3emJlZ3lia2pmeW9iaWx2cGdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3OTI3MDMsImV4cCI6MjA1OTM2ODcwM30.fA3BstNKr9IqjkRdaS1oNMrj5T3EYFefRfSmNWsS_M0';
+
+  // ⚠️ CHANGE CE MOT DE PASSE AVANT DE POUSSER SUR GITHUB
+  const PASSWORD = 'admin2024';
+
+  const PAGE_SIZE = 20;
+  let currentPage = 0;
+  let currentSearch = '';
+  let currentFournisseur = '';
+  let totalCount = 0;
+
+  function checkLogin() {
+    const val = document.getElementById('pwd-input').value;
+    if (val === PASSWORD) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      loadDashboard();
+    } else {
+      document.getElementById('login-error').style.display = 'block';
+    }
+  }
+
+  document.getElementById('pwd-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') checkLogin();
+  });
+
+  function logout() {
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('pwd-input').value = '';
+  }
+
+  async function sbFetch(path) {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+      headers: {
+        'apikey': ANON_KEY,
+        'Authorization': 'Bearer ' + ANON_KEY,
+        'Prefer': 'count=exact'
+      }
+    });
+    const count = res.headers.get('content-range')
+      ? parseInt(res.headers.get('content-range').split('/')[1])
+      : null;
+    const data = await res.json();
+    return { data, count };
+  }
+
+  async function loadDashboard() {
+    loadStats();
+    loadFournisseurs();
+    loadProducts();
+    loadLogs();
+  }
+
+  async function loadStats() {
+    const { count: total } = await sbFetch('produits?select=id');
+    document.getElementById('stat-total').textContent = total !== null ? total.toLocaleString() : '—';
+
+    const { count: nullTags } = await sbFetch('produits?select=id&tags=is.null');
+    document.getElementById('stat-tags-null').textContent = nullTags !== null ? nullTags : '—';
+    if (nullTags > 0) {
+      document.getElementById('total-tag-null').textContent = '⚠ ' + nullTags + ' produits sans tags';
+    }
+
+    const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+    const { count: recent } = await sbFetch('produits?select=id&created_at=gte.' + sevenDaysAgo);
+    document.getElementById('stat-7j').textContent = recent !== null ? recent : '—';
+
+    const { data: lastProd } = await sbFetch('produits?select=scraped_at&order=scraped_at.desc&limit=1');
+    if (lastProd && lastProd[0] && lastProd[0].scraped_at) {
+      const d = new Date(lastProd[0].scraped_at);
+      document.getElementById('last-sync').textContent =
+        'Dernière synchro : ' + d.toLocaleDateString('fr-FR') + ' ' +
+        d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    }
+  }
+
+  async function loadFournisseurs() {
+    const fournisseurs = ['Vintage Wholesale Supply', 'Wing999', 'Syed Vintage'];
+    const colors = ['#378ADD', '#1D9E75', '#D85A30'];
+    const grid = document.getElementById('fournisseur-grid');
+    grid.innerHTML = '';
+
+    const counts = [];
+    for (const f of fournisseurs) {
+      const { count } = await sbFetch('produits?select=id&fournisseur=eq.' + encodeURIComponent(f));
+      counts.push(count || 0);
+    }
+    const total = counts.reduce((a, b) => a + b, 0) || 1;
+
+    fournisseurs.forEach((f, i) => {
+      const pct = Math.round(counts[i] / total * 100);
+      const card = document.createElement('div');
+      card.className = 'fournisseur-card';
+      card.innerHTML = `
+        <div class="fname">${f}</div>
+        <div class="fcount">${counts[i].toLocaleString()}</div>
+        <div class="flabel">produits</div>
+        <div class="fpct">${pct}% du catalogue</div>
+        <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${colors[i]}"></div></div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  async function loadProducts() {
+    const tbody = document.getElementById('products-tbody');
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:#888780"><span class="spinner"></span></td></tr>';
+
+    let query = 'produits?select=id,title,url,price,fournisseur,created_at,tags';
+    query += '&order=created_at.desc';
+    query += '&limit=' + PAGE_SIZE + '&offset=' + (currentPage * PAGE_SIZE);
+    if (currentSearch) query += '&title=ilike.*' + encodeURIComponent(currentSearch) + '*';
+    if (currentFournisseur) query += '&fournisseur=eq.' + encodeURIComponent(currentFournisseur);
+
+    const { data, count } = await sbFetch(query);
+    totalCount = count || 0;
+    tbody.innerHTML = '';
+
+    if (!data || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:#888780">Aucun produit trouvé.</td></tr>';
+    } else {
+      data.forEach(p => {
+        const tr = document.createElement('tr');
+        let tags = null;
+        try { tags = p.tags ? (typeof p.tags === 'string' ? JSON.parse(p.tags) : p.tags) : null; } catch(e) {}
+        const tagHtml = tags && tags.fr
+          ? tags.fr.slice(0, 2).map(t => `<span class="tag-pill">${t}</span>`).join('')
+          : '<span style="color:#b4b2a9;font-size:12px;">—</span>';
+        const date = p.created_at ? new Date(p.created_at).toLocaleDateString('fr-FR') : '—';
+        const price = p.price ? parseFloat(p.price).toFixed(2) + ' €' : '—';
+        tr.innerHTML = `
+          <td><a class="prod-link" href="${p.url || '#'}" target="_blank" title="${p.title || ''}">${p.title || '—'}</a></td>
+          <td style="color:#5f5e5a">${p.fournisseur || '—'}</td>
+          <td>${price}</td>
+          <td>${tagHtml}</td>
+          <td style="color:#888780">${date}</td>
+          <td><button class="btn-del" onclick="deleteProduct('${p.id}', this)">Suppr.</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+    document.getElementById('pagination-info').textContent =
+      (currentPage * PAGE_SIZE + 1) + '–' + Math.min((currentPage + 1) * PAGE_SIZE, totalCount) +
+      ' sur ' + totalCount.toLocaleString();
+    document.getElementById('btn-prev').disabled = currentPage === 0;
+    document.getElementById('btn-next').disabled = currentPage >= totalPages - 1;
+  }
+
+  async function deleteProduct(id, btn) {
+    if (!confirm('Supprimer ce produit définitivement ?')) return;
+    btn.disabled = true;
+    btn.textContent = '…';
+    await fetch(SUPABASE_URL + '/rest/v1/produits?id=eq.' + id, {
+      method: 'DELETE',
+      headers: { 'apikey': ANON_KEY, 'Authorization': 'Bearer ' + ANON_KEY }
+    });
+    loadProducts();
+    loadStats();
+  }
+
+  function changePage(dir) {
+    currentPage += dir;
+    loadProducts();
+  }
+
+  let searchTimeout;
+  document.getElementById('search-input').addEventListener('input', e => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      currentSearch = e.target.value;
+      currentPage = 0;
+      loadProducts();
+    }, 400);
+  });
+
+  document.getElementById('filter-fournisseur').addEventListener('change', e => {
+    currentFournisseur = e.target.value;
+    currentPage = 0;
+    loadProducts();
+  });
+
+  async function loadLogs() {
+    const wrapper = document.getElementById('logs-wrapper');
+    const { data } = await sbFetch('produits?select=fournisseur,scraped_at&order=scraped_at.desc&limit=100');
+
+    if (!data || data.length === 0) {
+      wrapper.innerHTML = '<div class="log-row"><span style="color:#888780">Aucun log disponible.</span></div>';
+      return;
+    }
+
+    const byFournisseur = {};
+    data.forEach(p => {
+      if (!byFournisseur[p.fournisseur] || p.scraped_at > byFournisseur[p.fournisseur]) {
+        byFournisseur[p.fournisseur] = p.scraped_at;
+      }
+    });
+
+    wrapper.innerHTML = '';
+    ['Vintage Wholesale Supply', 'Wing999', 'Syed Vintage'].forEach(f => {
+      const lastScrape = byFournisseur[f];
+      const row = document.createElement('div');
+      row.className = 'log-row';
+      if (lastScrape) {
+        const d = new Date(lastScrape);
+        const ago = Math.round((Date.now() - d) / 3600000);
+        const agoStr = ago < 1 ? 'il y a < 1h' : ago < 24 ? `il y a ${ago}h` : `il y a ${Math.round(ago / 24)}j`;
+        row.innerHTML = `
+          <span class="dot dot-green"></span>
+          <span style="font-weight:600">${f}</span>
+          <span class="log-time">${agoStr}</span>
+          <span class="badge badge-green">OK</span>
+        `;
+      } else {
+        row.innerHTML = `
+          <span class="dot" style="background:#b4b2a9"></span>
+          <span style="color:#5f5e5a">${f}</span>
+          <span class="badge badge-amber" style="margin-left:auto">Aucune donnée</span>
+        `;
+      }
+      wrapper.appendChild(row);
+    });
+  }
+</script>
+</body>
+</html>
