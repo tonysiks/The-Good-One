@@ -334,11 +334,27 @@ function showLoading() {
   document.getElementById('productsGrid').innerHTML = `<div class="loading-state"><div class="loading-bar"><div class="loading-bar-inner"></div></div><div class="loading-text">Chargement...</div></div>`;
 }
 
+function isValidCategory(c) {
+  if (!c) return false;
+  // Filtre les fausses catégories type "0 items", "1 item", "49 items"
+  if (/^\d+\s+items?$/i.test(c.trim())) return false;
+  if (c.trim() === '0') return false;
+  return true;
+}
+
 function buildCategories(products) {
   const cats = {};
-  products.forEach(p => { const c = p['category'] || 'Autre'; cats[c] = (cats[c]||0)+1; });
-  document.getElementById('categoryFilters').innerHTML = Object.entries(cats)
-    .sort((a,b) => b[1]-a[1]).slice(0,10)
+  products.forEach(p => {
+    const c = p['category'];
+    if (!isValidCategory(c)) return;
+    cats[c] = (cats[c] || 0) + 1;
+  });
+  const entries = Object.entries(cats).sort((a,b) => b[1]-a[1]).slice(0,10);
+  if (entries.length === 0) {
+    document.getElementById('categoryFilters').innerHTML = '<div style="font-size:11px;color:var(--muted);padding:8px 0;">Aucune catégorie</div>';
+    return;
+  }
+  document.getElementById('categoryFilters').innerHTML = entries
     .map(([c,n]) => `
       <div class="filter-opt ${activeCategory===c?'active':''}" onclick="filterCat('${c.replace(/'/g,"\\'")}')">
         <div class="filter-opt-left"><div class="f-check"></div>${c}</div>
