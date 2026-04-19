@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Good One — Produit</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap');
+:root{--black:#0a0a0a;--white:#ffffff;--off-white:#f8f6f2;--blue:#0070F3;--blue-dark:#0057c2;--gray:#f0ede8;--gray2:#e0dcd6;--text:#1a1a1a;--muted:#888;--border:#e0dcd6;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--off-white);color:var(--text);font-family:'Barlow',sans-serif;}
+nav{background:var(--white);border-bottom:2px solid var(--black);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:200;}
+.logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:24px;text-transform:uppercase;letter-spacing:2px;color:var(--black);text-decoration:none;}
+.logo span{color:var(--blue);}
+.nav-back{display:flex;align-items:center;gap:8px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color 0.2s;}
+.nav-back:hover{color:var(--blue);}
+
+.breadcrumb{padding:16px 40px;font-size:12px;color:var(--muted);letter-spacing:1px;}
+.breadcrumb a{color:var(--muted);text-decoration:none;}.breadcrumb a:hover{color:var(--blue);}
+
+.product-layout{display:grid;grid-template-columns:1fr 1fr;gap:0;max-width:1200px;margin:0 auto 60px;background:var(--white);border:2px solid var(--black);}
+
+.product-img-side{border-right:2px solid var(--black);position:relative;}
+.product-img-wrap{aspect-ratio:1;overflow:hidden;background:var(--gray);}
+.product-img{width:100%;height:100%;object-fit:cover;}
+.product-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:96px;color:var(--gray2);}
+.product-badge{position:absolute;top:16px;left:0;background:var(--blue);color:white;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;}
+
+.product-info-side{padding:40px;}
+.product-supplier-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.product-supplier{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--blue);}
+.product-date{font-size:11px;color:var(--muted);}
+.product-title{font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:900;text-transform:uppercase;line-height:1;margin-bottom:12px;color:var(--black);}
+.product-cat{display:inline-block;background:var(--gray);border:1px solid var(--gray2);font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;color:var(--muted);margin-bottom:24px;}
+
+.product-price-box{background:var(--off-white);border:2px solid var(--black);padding:24px;margin-bottom:24px;}
+.product-price-label{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.product-price{font-family:'Barlow Condensed',sans-serif;font-size:56px;font-weight:900;color:var(--black);line-height:1;}
+.product-price-sub{font-size:12px;color:var(--muted);margin-top:4px;}
+
+.btn-cta{display:block;width:100%;background:var(--blue);color:var(--white);border:none;padding:18px;font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;letter-spacing:2px;text-transform:uppercase;cursor:pointer;text-align:center;text-decoration:none;transition:background 0.2s;margin-bottom:12px;}
+.btn-cta:hover{background:var(--blue-dark);}
+.btn-secondary{display:block;width:100%;background:transparent;color:var(--black);border:2px solid var(--black);padding:14px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;letter-spacing:2px;text-transform:uppercase;cursor:pointer;text-align:center;text-decoration:none;transition:all 0.2s;}
+.btn-secondary:hover{background:var(--black);color:var(--white);}
+
+.product-tags{margin-top:24px;padding-top:24px;border-top:2px solid var(--black);}
+.tags-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.tags-list{display:flex;flex-wrap:wrap;gap:6px;}
+.tag{background:var(--gray);border:1px solid var(--gray2);font-size:11px;font-weight:500;padding:4px 10px;color:var(--muted);}
+
+.similar-section{max-width:1200px;margin:0 auto 60px;padding:0 0;}
+.similar-header{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;text-transform:uppercase;letter-spacing:2px;padding:24px 0 16px;border-bottom:2px solid var(--black);margin-bottom:2px;}
+.similar-header span{color:var(--blue);}
+.similar-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;}
+.pcard{background:var(--white);border:2px solid var(--white);cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;}
+.pcard:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,0.12);}
+.pcard-img-wrap{position:relative;aspect-ratio:1;overflow:hidden;background:var(--gray);}
+.pcard-img{width:100%;height:100%;object-fit:cover;transition:transform 0.4s ease;}
+.pcard:hover .pcard-img{transform:scale(1.05);}
+.pcard-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:48px;color:var(--gray2);}
+.pcard-body{padding:12px 14px 14px;}
+.pcard-supplier{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:4px;}
+.pcard-title{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;text-transform:uppercase;color:var(--black);margin-bottom:4px;line-height:1.1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.pcard-footer{display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:2px solid var(--black);margin-top:8px;}
+.pcard-price{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;}
+.pcard-action{background:var(--black);color:var(--white);border:none;padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;text-decoration:none;}
+.pcard-action:hover{background:var(--blue);}
+
+.loading-box{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:400px;gap:16px;}
+.loading-bar{width:200px;height:3px;background:var(--gray2);overflow:hidden;}
+.loading-bar-inner{height:100%;background:var(--blue);animation:loadBar 1.2s ease-in-out infinite;}
+@keyframes loadBar{0%{width:0%;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0%;margin-left:100%}}
+.loading-text{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--muted);}
+
+footer{background:var(--black);color:var(--white);padding:40px;display:flex;align-items:center;justify-content:space-between;border-top:3px solid var(--blue);}
+.footer-logo{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;text-transform:uppercase;letter-spacing:2px;}
+.footer-logo span{color:var(--blue);}
+.footer-text{font-size:12px;color:rgba(255,255,255,0.4);letter-spacing:1px;}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="/">THE GOOD <span>ONE</span></a>
+  <a class="nav-back" href="/">← Retour aux offres</a>
+</nav>
+
+<div id="app">
+  <div class="loading-box">
+    <div class="loading-bar"><div class="loading-bar-inner"></div></div>
+    <div class="loading-text">Chargement du produit...</div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">THE GOOD <span>ONE</span></div>
+  <div class="footer-text">© 2026 · Le moteur de recherche du wholesale fripe</div>
+</footer>
+
+<script>
+const SUPABASE_URL = 'https://awzbegybkjfyobilvpgc.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3emJlZ3lia2pmeW9iaWx2cGdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5NjM3MjcsImV4cCI6MjA5MTUzOTcyN30.NENJdd9sZiyoh7vR4j-msWJ8u0uLFxnz4s-6qYmUkuM';
+
+function slugify(str) {
+  return str.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+function timeAgo(dateStr) {
+  if (!dateStr) return '';
+  const diff = Math.floor((new Date() - new Date(dateStr)) / 1000);
+  if (diff < 3600) return `il y a ${Math.floor(diff/60)} min`;
+  if (diff < 86400) return `il y a ${Math.floor(diff/3600)}h`;
+  if (diff < 604800) return `il y a ${Math.floor(diff/86400)}j`;
+  return `il y a ${Math.floor(diff/604800)} sem`;
+}
+
+function getSlugFromURL() {
+  const parts = window.location.pathname.split('/');
+  return parts[parts.length - 1];
+}
+
+async function loadProduct() {
+  const slug = getSlugFromURL();
+  if (!slug) { showError('Produit introuvable'); return; }
+
+  try {
+    // Récupère tous les produits et trouve celui dont le slug correspond
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/produits?select=*&limit=10000`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Range': '0-9999' }
+    });
+    const data = await res.json();
+    const product = data.find(p => slugify(p.title || '') === slug);
+
+    if (!product) { showError('Produit introuvable'); return; }
+
+    // Met à jour le titre de la page
+    document.title = `${product.title} — The Good One`;
+
+    // Produits similaires (même catégorie, excl. le produit actuel)
+    const similar = data
+      .filter(p => p.category === product.category && slugify(p.title || '') !== slug)
+      .slice(0, 4);
+
+    renderProduct(product, similar);
+  } catch(e) {
+    showError('Erreur de chargement');
+  }
+}
+
+function renderProduct(p, similar) {
+  const slug = slugify(p.title || '');
+  const price = p.price ? `£${p.price}` : 'Voir prix';
+  const ago = timeAgo(p.scraped_at);
+  const tags = p.tags ? p.tags.split(',').map(t => t.trim()).filter(Boolean).slice(0, 12) : [];
+
+  document.getElementById('app').innerHTML = `
+    <div class="breadcrumb">
+      <a href="/">Accueil</a> › <a href="/?fournisseur=${encodeURIComponent(p.fournisseur)}">${p.fournisseur || 'Fournisseur'}</a> › ${p.title || 'Produit'}
+    </div>
+
+    <div class="product-layout">
+      <div class="product-img-side">
+        <div class="product-img-wrap">
+          ${p.image_url
+            ? `<img class="product-img" src="${p.image_url}" alt="${(p.title||'').replace(/"/g,'')}" onerror="this.parentElement.innerHTML='<div class=product-placeholder>🧥</div>'">`
+            : `<div class="product-placeholder">🧥</div>`}
+        </div>
+        <div class="product-badge">Wholesale vérifié</div>
+      </div>
+
+      <div class="product-info-side">
+        <div class="product-supplier-row">
+          <div class="product-supplier">${p.fournisseur || ''}</div>
+          <div class="product-date">${ago ? `Ajouté ${ago}` : ''}</div>
+        </div>
+        <div class="product-title">${p.title || 'Produit'}</div>
+        ${p.category ? `<div class="product-cat">${p.category}</div>` : ''}
+
+        <div class="product-price-box">
+          <div class="product-price-label">Prix wholesale</div>
+          <div class="product-price">${price}</div>
+          <div class="product-price-sub">Prix affiché par le fournisseur</div>
+        </div>
+
+        <a class="btn-cta" href="${p.url || '#'}" target="_blank" rel="noopener">
+          Voir chez le fournisseur →
+        </a>
+        <a class="btn-secondary" href="/">← Retour aux offres</a>
+
+        ${tags.length ? `
+          <div class="product-tags">
+            <div class="tags-label">Mots-clés</div>
+            <div class="tags-list">${tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+          </div>` : ''}
+      </div>
+    </div>
+
+    ${similar.length ? `
+      <div class="similar-section">
+        <div class="similar-header">Produits <span>similaires</span></div>
+        <div class="similar-grid">
+          ${similar.map(s => {
+            const sSlug = slugify(s.title || '');
+            return `<div class="pcard" onclick="window.location='/produit/${sSlug}'">
+              <div class="pcard-img-wrap">
+                ${s.image_url
+                  ? `<img class="pcard-img" src="${s.image_url}" alt="${(s.title||'').replace(/"/g,'')}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=pcard-placeholder>🧥</div>'">`
+                  : `<div class="pcard-placeholder">🧥</div>`}
+              </div>
+              <div class="pcard-body">
+                <div class="pcard-supplier">${s.fournisseur || ''}</div>
+                <div class="pcard-title">${s.title || 'Produit'}</div>
+                <div class="pcard-footer">
+                  <div class="pcard-price">${s.price ? `£${s.price}` : '—'}</div>
+                  <a class="pcard-action" href="/produit/${sSlug}">Voir →</a>
+                </div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>` : ''}
+  `;
+}
+
+function showError(msg) {
+  document.getElementById('app').innerHTML = `
+    <div class="loading-box">
+      <div class="loading-text">⚠️ ${msg}</div>
+      <a href="/" style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--blue);">← Retour aux offres</a>
+    </div>`;
+}
+
+loadProduct();
+</script>
+</body>
+</html>
