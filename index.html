@@ -407,6 +407,13 @@ function timeAgo(dateStr) {
   return `il y a ${Math.floor(diff/604800)} sem`;
 }
 
+function slugify(str) {
+  return str.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
 function renderCards(products) {
   if (!products.length) {
     document.getElementById('productsGrid').innerHTML = '<div class="error-state">Aucun résultat</div>';
@@ -420,10 +427,11 @@ function renderCards(products) {
   document.getElementById('productsGrid').innerHTML = paginated.map((p,i) => {
     const badge = i < 3 ? badges[i] : (i%8===0?'NOUVEAU':'');
     const img = p['image_url'];
-    const productUrl = p.url || '#';
+    const slug = slugify(p.title || 'produit');
+    const productPage = `/produit/${slug}`;
     const price = p.price ? `£${p.price}` : 'Voir prix';
     const ago = timeAgo(p.scraped_at);
-    return `<div class="pcard" onclick="window.open('${productUrl}','_blank')">
+    return `<div class="pcard" onclick="window.location='${productPage}'">
       ${badge?`<div class="pcard-badge ${i===2?'deal':''}">${badge}</div>`:''}
       <div class="pcard-img-wrap">
         ${img?`<img class="pcard-img" src="${img}" alt="${(p.title||'').replace(/"/g,'')}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=pcard-placeholder>🧥</div>'">`:`<div class="pcard-placeholder">🧥</div>`}
@@ -434,7 +442,7 @@ function renderCards(products) {
         <div class="pcard-cat">${p['category']||'Non catégorisé'}</div>
         <div class="pcard-footer">
           <div><div class="pcard-price">${price}</div><div class="pcard-price-sub">Prix wholesale</div></div>
-          <a class="pcard-action" href="${productUrl}" target="_blank" onclick="event.stopPropagation()">Voir →</a>
+          <a class="pcard-action" href="${productPage}" onclick="event.stopPropagation()">Voir →</a>
         </div>
       </div>
     </div>`;
